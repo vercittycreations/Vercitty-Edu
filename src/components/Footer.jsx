@@ -16,6 +16,7 @@ const socials = [
 const quickLinks = [
   { label: 'Home', to: '/' },
   { label: 'Apply Now', to: '/apply' },
+  { label: 'Student Lookup', to: '/student-lookup' },
   { label: 'Admin Login', to: '/admin-login' },
 ]
 
@@ -154,6 +155,10 @@ export default function Footer() {
   gap-3 text-slate-600 text-xs">
           <p>© {new Date().getFullYear()} VaultCraft. All rights reserved.</p>
           <div className="flex items-center gap-4 flex-wrap justify-center">
+            <Link to="/student-lookup"
+              className="hover:text-slate-400 transition-colors">
+              Student Lookup
+            </Link>
             <Link to="/privacy"
               className="hover:text-slate-400 transition-colors">
               Privacy Policy

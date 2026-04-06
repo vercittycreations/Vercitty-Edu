@@ -3,28 +3,24 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Plus, Tag, Trash2, X, Check,
   Loader2, AlertCircle, CheckCircle2,
-  Sparkles, TrendingDown,
+  Sparkles, TrendingDown, Calendar,
 } from 'lucide-react'
 import {
   collection, onSnapshot, query, orderBy,
   addDoc, deleteDoc, doc, getDocs, where,
-  serverTimestamp,
+  serverTimestamp, Timestamp,
 } from 'firebase/firestore'
-import { db } from "../../config/firebase";
+import { db } from '../../config/firebase'
 import { BASE_PRICE } from '../../config/razorpay'
 
-/* ── Usage bar ──────────────────────────────── */
 function UsageBar({ used, total }) {
-  const pct = total > 0 ? (used / total) * 100 : 0
-  const color =
-    pct > 60 ? 'bg-green-500' :
-    pct > 25 ? 'bg-yellow-500' : 'bg-red-500'
+  const pct   = total > 0 ? (used / total) * 100 : 0
+  const color = pct > 60 ? 'bg-green-500' : pct > 25 ? 'bg-yellow-500' : 'bg-red-500'
   return (
     <div className="flex items-center gap-2 min-w-[110px]">
       <div className="flex-1 h-1.5 bg-slate-700/60 rounded-full overflow-hidden">
         <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${pct}%` }}
+          initial={{ width: 0 }} animate={{ width: `${pct}%` }}
           transition={{ duration: 0.7, ease: 'easeOut' }}
           className={`h-full rounded-full ${color}`}
         />
@@ -36,7 +32,6 @@ function UsageBar({ used, total }) {
   )
 }
 
-/* ── Inline alert ───────────────────────────── */
 function Alert({ type, message, onClose }) {
   const styles = {
     success: 'bg-green-500/10 border-green-500/25 text-green-400',
@@ -49,8 +44,7 @@ function Alert({ type, message, onClose }) {
       animate={{ opacity: 1,  y:  0, height: 'auto' }}
       exit={{    opacity: 0,  y: -4, height: 0 }}
       transition={{ duration: 0.22 }}
-      className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border
-        text-sm overflow-hidden ${styles[type]}`}
+      className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border text-sm overflow-hidden ${styles[type]}`}
     >
       <Icon size={14} className="shrink-0" />
       <span className="flex-1">{message}</span>
@@ -63,40 +57,45 @@ function Alert({ type, message, onClose }) {
   )
 }
 
-/* ── Main component ─────────────────────────── */
+function isExpired(coupon) {
+  if (!coupon.expiresAt) return false
+  const d = coupon.expiresAt?.toDate ? coupon.expiresAt.toDate() : new Date(coupon.expiresAt)
+  return d < new Date()
+}
+
+function formatExpiry(coupon) {
+  if (!coupon.expiresAt) return null
+  const d = coupon.expiresAt?.toDate ? coupon.expiresAt.toDate() : new Date(coupon.expiresAt)
+  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
 export default function CouponManager() {
   const [coupons,  setCoupons]  = useState([])
   const [loading,  setLoading]  = useState(true)
   const [adding,   setAdding]   = useState(false)
   const [busy,     setBusy]     = useState(false)
   const [deleting, setDeleting] = useState(null)
-  const [alert,    setAlert]    = useState(null) // { type, message }
+  const [alert,    setAlert]    = useState(null)
 
   const [form, setForm] = useState({
-    code: '', discountedPrice: '', usageLimit: '',
+    code: '', discountedPrice: '', usageLimit: '', expiresAt: '',
   })
   const [formErr, setFormErr] = useState({})
   const codeRef = useRef(null)
 
-  /* ── Real-time listener ─── */
   useEffect(() => {
     const q = query(collection(db, 'coupons'), orderBy('createdAt', 'desc'))
     const unsub = onSnapshot(q, snap => {
       setCoupons(snap.docs.map(d => ({ docId: d.id, ...d.data() })))
       setLoading(false)
-    }, err => {
-      console.error('[CouponManager]', err)
-      setLoading(false)
-    })
+    }, err => { console.error('[CouponManager]', err); setLoading(false) })
     return unsub
   }, [])
 
-  /* ── Auto-focus when form opens ─── */
   useEffect(() => {
     if (adding) setTimeout(() => codeRef.current?.focus(), 60)
   }, [adding])
 
-  /* ── Auto-dismiss alert after 4.5s ─── */
   useEffect(() => {
     if (!alert) return
     const t = setTimeout(() => setAlert(null), 4500)
@@ -104,12 +103,8 @@ export default function CouponManager() {
   }, [alert])
 
   const set = k => e =>
-    setForm(p => ({
-      ...p,
-      [k]: k === 'code' ? e.target.value.toUpperCase() : e.target.value,
-    }))
+    setForm(p => ({ ...p, [k]: k === 'code' ? e.target.value.toUpperCase() : e.target.value }))
 
-  /* ── Validation ─── */
   function validate() {
     const e = {}
     if (!form.code.trim())
@@ -127,17 +122,18 @@ export default function CouponManager() {
     if (!form.usageLimit || isNaN(ul) || ul < 1)
       e.usageLimit = 'Minimum usage limit is 1.'
 
+    if (form.expiresAt && new Date(form.expiresAt) <= new Date())
+      e.expiresAt = 'Expiry date must be in the future.'
+
     return e
   }
 
-  /* ── Duplicate check (Firestore query) ─── */
   async function isDuplicate(code) {
     const q = query(collection(db, 'coupons'), where('code', '==', code))
     const snap = await getDocs(q)
     return !snap.empty
   }
 
-  /* ── Create coupon ─── */
   async function handleCreate() {
     const e = validate()
     setFormErr(e)
@@ -146,23 +142,25 @@ export default function CouponManager() {
     setBusy(true)
     try {
       const code = form.code.trim()
-
-      // Prevent duplicates
       if (await isDuplicate(code)) {
         setFormErr(p => ({ ...p, code: `Coupon "${code}" already exists.` }))
         setBusy(false)
         return
       }
 
-      await addDoc(collection(db, 'coupons'), {
+      const data = {
         code,
         discountedPrice: Number(form.discountedPrice),
         usageLeft:       Number(form.usageLimit),
         totalLimit:      Number(form.usageLimit),
         createdAt:       serverTimestamp(),
-      })
+      }
+      if (form.expiresAt) {
+        data.expiresAt = Timestamp.fromDate(new Date(form.expiresAt))
+      }
 
-      setForm({ code: '', discountedPrice: '', usageLimit: '' })
+      await addDoc(collection(db, 'coupons'), data)
+      setForm({ code: '', discountedPrice: '', usageLimit: '', expiresAt: '' })
       setFormErr({})
       setAdding(false)
       setAlert({ type: 'success', message: `Coupon "${code}" created successfully!` })
@@ -174,7 +172,6 @@ export default function CouponManager() {
     }
   }
 
-  /* ── Delete coupon ─── */
   async function handleDelete(docId, code) {
     if (!confirm(`Delete coupon "${code}"? This cannot be undone.`)) return
     setDeleting(docId)
@@ -190,7 +187,7 @@ export default function CouponManager() {
 
   function cancelAdd() {
     setAdding(false)
-    setForm({ code: '', discountedPrice: '', usageLimit: '' })
+    setForm({ code: '', discountedPrice: '', usageLimit: '', expiresAt: '' })
     setFormErr({})
   }
 
@@ -199,15 +196,17 @@ export default function CouponManager() {
       ? BASE_PRICE - Number(form.discountedPrice)
       : null
 
+  const todayStr = new Date().toISOString().split('T')[0]
+
   return (
     <div className="flex flex-col gap-5">
 
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h3 className="font-bold text-white text-xl">Coupon Management</h3>
           <p className="text-slate-500 text-sm mt-0.5">
-            Create discount codes for student enrollment.{' '}
+            Create discount codes.{' '}
             Base price:{' '}
             <span className="text-indigo-400 font-mono font-semibold">
               ₹{BASE_PRICE.toLocaleString('en-IN')}
@@ -219,192 +218,145 @@ export default function CouponManager() {
             onClick={() => setAdding(true)}
             whileHover={{ y: -1, boxShadow: '0 0 20px rgba(99,102,241,0.35)' }}
             whileTap={{ scale: 0.97 }}
-            className="btn-primary py-2.5 px-4 rounded-xl text-sm
-              flex items-center gap-1.5 shrink-0"
+            className="btn-primary py-2.5 px-4 rounded-xl text-sm flex items-center gap-1.5 shrink-0"
           >
             <Plus size={15} /> New Coupon
           </motion.button>
         )}
       </div>
 
-      {/* ── Alert banner ── */}
+      {/* Alert */}
       <AnimatePresence>
         {alert && (
-          <Alert
-            key={alert.message + Date.now()}
-            type={alert.type}
-            message={alert.message}
-            onClose={() => setAlert(null)}
-          />
+          <Alert key={alert.message + Date.now()} type={alert.type}
+            message={alert.message} onClose={() => setAlert(null)} />
         )}
       </AnimatePresence>
 
-      {/* ── Create form ── */}
+      {/* Create form */}
       <AnimatePresence>
         {adding && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1,  height: 'auto' }}
-            exit={{    opacity: 0,  height: 0 }}
+            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <div className="glass rounded-2xl p-5 sm:p-6 flex flex-col gap-4
-              border border-indigo-500/20">
-
-              {/* Form heading */}
+            <div className="glass rounded-2xl p-5 sm:p-6 flex flex-col gap-4 border border-indigo-500/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-indigo-500/15
-                    flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-lg bg-indigo-500/15 flex items-center justify-center">
                     <Sparkles size={13} className="text-indigo-400" />
                   </div>
                   <p className="font-semibold text-white text-sm">Create New Coupon</p>
                 </div>
                 <button onClick={cancelAdd}
-                  className="p-1.5 rounded-lg text-slate-500 hover:text-white
-                    hover:bg-white/5 transition-colors">
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-colors">
                   <X size={14} />
                 </button>
               </div>
 
-              {/* Fields grid */}
+              {/* Fields — 2 rows: top 3 cols, bottom expiry */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-
                 {/* Code */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs text-slate-400 uppercase
-                    tracking-widest font-mono">
-                    Coupon Code *
-                  </label>
+                  <label className="text-xs text-slate-400 uppercase tracking-widest font-mono">Coupon Code *</label>
                   <div className="input-wrap">
                     <span className="input-icon-left"><Tag size={14} /></span>
-                    <input
-                      ref={codeRef}
-                      type="text"
-                      placeholder="LAUNCH50"
-                      value={form.code}
-                      onChange={set('code')}
-                      maxLength={20}
+                    <input ref={codeRef} type="text" placeholder="LAUNCH50"
+                      value={form.code} onChange={set('code')} maxLength={20}
                       onKeyDown={e => e.key === 'Enter' && handleCreate()}
-                      className={`form-input form-input-icon-left text-sm
-                        font-mono uppercase tracking-widest
-                        ${formErr.code ? 'border-red-500/60' : ''}`}
+                      className={`form-input form-input-icon-left text-sm font-mono uppercase tracking-widest ${formErr.code ? 'border-red-500/60' : ''}`}
                     />
                   </div>
                   {formErr.code
                     ? <p className="text-xs text-red-400">{formErr.code}</p>
-                    : <p className="text-xs text-slate-600">
-                        Letters, numbers, _ or - only
-                      </p>
+                    : <p className="text-xs text-slate-600">Letters, numbers, _ or -</p>
                   }
                 </div>
 
                 {/* Discounted price */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs text-slate-400 uppercase
-                    tracking-widest font-mono">
-                    Discounted Price (₹) *
-                  </label>
+                  <label className="text-xs text-slate-400 uppercase tracking-widest font-mono">Discounted Price (₹) *</label>
                   <div className="input-wrap">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2
-                      font-mono text-slate-400 text-sm pointer-events-none
-                      select-none">
-                      ₹
-                    </span>
-                    <input
-                      type="number"
-                      placeholder="999"
-                      min="1"
-                      max={BASE_PRICE - 1}
-                      value={form.discountedPrice}
-                      onChange={set('discountedPrice')}
-                      className={`form-input text-sm
-                        ${formErr.discountedPrice ? 'border-red-500/60' : ''}`}
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-slate-400 text-sm pointer-events-none select-none">₹</span>
+                    <input type="number" placeholder="999" min="1" max={BASE_PRICE - 1}
+                      value={form.discountedPrice} onChange={set('discountedPrice')}
+                      className={`form-input text-sm ${formErr.discountedPrice ? 'border-red-500/60' : ''}`}
                       style={{ paddingLeft: 26 }}
                     />
                   </div>
                   {formErr.discountedPrice
                     ? <p className="text-xs text-red-400">{formErr.discountedPrice}</p>
                     : discount
-                    ? <p className="text-xs text-green-400 flex items-center gap-1">
-                        <TrendingDown size={11} />
-                        Saves ₹{discount.toLocaleString('en-IN')}
-                      </p>
-                    : <p className="text-xs text-slate-600">
-                        Must be less than ₹{BASE_PRICE}
-                      </p>
+                    ? <p className="text-xs text-green-400 flex items-center gap-1"><TrendingDown size={11} />Saves ₹{discount.toLocaleString('en-IN')}</p>
+                    : <p className="text-xs text-slate-600">Must be less than ₹{BASE_PRICE}</p>
                   }
                 </div>
 
                 {/* Usage limit */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs text-slate-400 uppercase
-                    tracking-widest font-mono">
-                    Usage Limit *
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="10"
-                    min="1"
-                    value={form.usageLimit}
-                    onChange={set('usageLimit')}
-                    className={`form-input text-sm
-                      ${formErr.usageLimit ? 'border-red-500/60' : ''}`}
+                  <label className="text-xs text-slate-400 uppercase tracking-widest font-mono">Usage Limit *</label>
+                  <input type="number" placeholder="10" min="1"
+                    value={form.usageLimit} onChange={set('usageLimit')}
+                    className={`form-input text-sm ${formErr.usageLimit ? 'border-red-500/60' : ''}`}
                   />
                   {formErr.usageLimit
                     ? <p className="text-xs text-red-400">{formErr.usageLimit}</p>
-                    : <p className="text-xs text-slate-600">
-                        Max times this code can be used
-                      </p>
+                    : <p className="text-xs text-slate-600">Max times this code can be used</p>
                   }
                 </div>
               </div>
 
-              {/* Live preview pill */}
+              {/* Expiry date — optional */}
+              <div className="flex flex-col gap-1.5 max-w-xs">
+                <label className="text-xs text-slate-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
+                  <Calendar size={11} /> Expiry Date (optional)
+                </label>
+                <div className="input-wrap">
+                  <span className="input-icon-left"><Calendar size={14} /></span>
+                  <input type="date" min={todayStr}
+                    value={form.expiresAt} onChange={set('expiresAt')}
+                    className={`form-input form-input-icon-left text-sm ${formErr.expiresAt ? 'border-red-500/60' : ''}`}
+                  />
+                </div>
+                {formErr.expiresAt
+                  ? <p className="text-xs text-red-400">{formErr.expiresAt}</p>
+                  : <p className="text-xs text-slate-600">Leave blank for no expiry</p>
+                }
+              </div>
+
+              {/* Live preview */}
               <AnimatePresence>
                 {form.code && discount && form.usageLimit && (
                   <motion.div
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1,  y: 0 }}
-                    exit={{    opacity: 0,  y: -4 }}
-                    className="flex flex-wrap items-center gap-3 px-4 py-3
-                      rounded-xl bg-indigo-500/6 border border-indigo-500/15"
+                    initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    className="flex flex-wrap items-center gap-3 px-4 py-3 rounded-xl bg-indigo-500/6 border border-indigo-500/15"
                   >
-                    <span className="font-mono font-bold text-indigo-300
-                      bg-indigo-500/15 px-2.5 py-1 rounded-lg text-xs">
+                    <span className="font-mono font-bold text-indigo-300 bg-indigo-500/15 px-2.5 py-1 rounded-lg text-xs">
                       {form.code}
                     </span>
                     <span className="text-slate-400 text-xs">
                       ₹{Number(form.discountedPrice).toLocaleString('en-IN')}
                       {' · '}saves ₹{discount.toLocaleString('en-IN')}
                       {' · '}{form.usageLimit} uses
+                      {form.expiresAt ? ` · expires ${new Date(form.expiresAt).toLocaleDateString('en-IN')}` : ''}
                     </span>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              {/* Submit / cancel */}
+              {/* Submit */}
               <div className="flex gap-2.5 pt-1">
-                <motion.button
-                  onClick={handleCreate}
-                  disabled={busy}
-                  whileHover={!busy ? { y: -1 } : {}}
-                  whileTap={{ scale: 0.97 }}
-                  className="btn-accent py-2.5 px-5 rounded-xl text-sm
-                    flex items-center gap-1.5 disabled:opacity-55"
+                <motion.button onClick={handleCreate} disabled={busy}
+                  whileHover={!busy ? { y: -1 } : {}} whileTap={{ scale: 0.97 }}
+                  className="btn-accent py-2.5 px-5 rounded-xl text-sm flex items-center gap-1.5 disabled:opacity-55"
                 >
-                  {busy
-                    ? <><Loader2 size={14} className="animate-spin" /> Creating…</>
-                    : <><Check size={14} /> Create Coupon</>
-                  }
+                  {busy ? <><Loader2 size={14} className="animate-spin" /> Creating…</> : <><Check size={14} /> Create Coupon</>}
                 </motion.button>
-                <button
-                  onClick={cancelAdd}
-                  className="glass-sm py-2.5 px-4 rounded-xl text-sm
-                    text-slate-400 hover:text-white transition-colors
-                    flex items-center gap-1.5"
-                >
+                <button onClick={cancelAdd}
+                  className="glass-sm py-2.5 px-4 rounded-xl text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-1.5">
                   <X size={14} /> Cancel
                 </button>
               </div>
@@ -413,7 +365,7 @@ export default function CouponManager() {
         )}
       </AnimatePresence>
 
-      {/* ── Coupons table ── */}
+      {/* Coupons table */}
       <div className="glass rounded-2xl overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -423,19 +375,17 @@ export default function CouponManager() {
           <div className="flex flex-col items-center gap-3 py-14 text-slate-600">
             <Tag size={30} className="opacity-25" />
             <p className="text-sm">No coupons yet.</p>
-            <button
-              onClick={() => setAdding(true)}
-              className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
-            >
+            <button onClick={() => setAdding(true)}
+              className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
               Create your first coupon →
             </button>
           </div>
         ) : (
           <div className="overflow-x-auto no-scrollbar">
-            <table className="data-table" style={{ minWidth: 700 }}>
+            <table className="data-table" style={{ minWidth: 760 }}>
               <thead>
                 <tr>
-                  {['Code','Original','Discounted','Saves','Usage','Created',''].map(h => (
+                  {['Code','Original','Discounted','Saves','Usage','Expiry','Created',''].map(h => (
                     <th key={h}>{h}</th>
                   ))}
                 </tr>
@@ -443,30 +393,28 @@ export default function CouponManager() {
               <tbody>
                 <AnimatePresence>
                   {coupons.map((c, i) => {
-                    const saves = BASE_PRICE - (c.discountedPrice ?? 0)
+                    const saves     = BASE_PRICE - (c.discountedPrice ?? 0)
+                    const expired   = isExpired(c)
+                    const expiryStr = formatExpiry(c)
                     const createdOn = c.createdAt?.toDate
-                      ? c.createdAt.toDate().toLocaleDateString('en-IN', {
-                          day: '2-digit', month: 'short', year: 'numeric',
-                        })
+                      ? c.createdAt.toDate().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })
                       : '—'
                     return (
-                      <motion.tr
-                        key={c.docId}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1,  y: 0 }}
-                        exit={{    opacity: 0,  x: 24 }}
-                        transition={{ delay: i * 0.04 }}
+                      <motion.tr key={c.docId}
+                        initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: 24 }} transition={{ delay: i * 0.04 }}
+                        className={expired ? 'opacity-50' : ''}
                       >
                         <td>
-                          <span className="font-mono font-semibold text-indigo-300
-                            bg-indigo-500/10 px-2.5 py-1 rounded-lg text-xs
-                            tracking-wider">
+                          <span className="font-mono font-semibold text-indigo-300 bg-indigo-500/10 px-2.5 py-1 rounded-lg text-xs tracking-wider">
                             {c.code}
                           </span>
+                          {expired && (
+                            <span className="ml-2 text-xs text-red-400 font-medium">expired</span>
+                          )}
                         </td>
                         <td>
-                          <span className="font-mono text-slate-500
-                            line-through text-sm">
+                          <span className="font-mono text-slate-500 line-through text-sm">
                             ₹{BASE_PRICE.toLocaleString('en-IN')}
                           </span>
                         </td>
@@ -484,16 +432,21 @@ export default function CouponManager() {
                           <UsageBar used={c.usageLeft} total={c.totalLimit} />
                         </td>
                         <td>
+                          {expiryStr ? (
+                            <span className={`text-xs font-mono ${expired ? 'text-red-400' : 'text-slate-400'}`}>
+                              {expiryStr}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-slate-600">No expiry</span>
+                          )}
+                        </td>
+                        <td>
                           <span className="text-slate-500 text-xs">{createdOn}</span>
                         </td>
                         <td>
-                          <button
-                            onClick={() => handleDelete(c.docId, c.code)}
+                          <button onClick={() => handleDelete(c.docId, c.code)}
                             disabled={deleting === c.docId}
-                            className="p-2 rounded-lg glass-sm text-slate-500
-                              hover:text-red-400 hover:bg-red-500/8 transition-all
-                              disabled:opacity-40"
-                          >
+                            className="p-2 rounded-lg glass-sm text-slate-500 hover:text-red-400 hover:bg-red-500/8 transition-all disabled:opacity-40">
                             {deleting === c.docId
                               ? <Loader2 size={13} className="animate-spin" />
                               : <Trash2 size={13} />
@@ -508,19 +461,11 @@ export default function CouponManager() {
             </table>
           </div>
         )}
-
-        {/* Footer count */}
         {!loading && coupons.length > 0 && (
-          <div className="px-5 py-3 border-t border-indigo-500/8
-            flex items-center justify-between">
-            <p className="text-xs text-slate-600">
-              {coupons.length} coupon{coupons.length !== 1 ? 's' : ''}
-            </p>
-            <button
-              onClick={() => setAdding(true)}
-              className="text-xs text-indigo-500 hover:text-indigo-400
-                transition-colors flex items-center gap-1"
-            >
+          <div className="px-5 py-3 border-t border-indigo-500/8 flex items-center justify-between">
+            <p className="text-xs text-slate-600">{coupons.length} coupon{coupons.length !== 1 ? 's' : ''}</p>
+            <button onClick={() => setAdding(true)}
+              className="text-xs text-indigo-500 hover:text-indigo-400 transition-colors flex items-center gap-1">
               <Plus size={11} /> Add another
             </button>
           </div>

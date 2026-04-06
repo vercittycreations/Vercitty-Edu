@@ -1,12 +1,13 @@
 import {
   collection, query, where, getDocs,
-  runTransaction, doc,
+  runTransaction, doc, Timestamp,
 } from 'firebase/firestore'
 import { db } from '../config/firebase'
 
 /**
  * Validate coupon code.
  * Returns { valid, discountedPrice, couponData } or { valid: false, message }
+ * Now also checks expiresAt if set.
  */
 export async function validateCoupon(code, basePrice) {
   if (!code || !code.trim()) {
@@ -26,6 +27,16 @@ export async function validateCoupon(code, basePrice) {
 
   const couponDoc  = snap.docs[0]
   const couponData = { docId: couponDoc.id, ...couponDoc.data() }
+
+  // ── Expiry check ──
+  if (couponData.expiresAt) {
+    const expiry = couponData.expiresAt?.toDate
+      ? couponData.expiresAt.toDate()
+      : new Date(couponData.expiresAt)
+    if (expiry < new Date()) {
+      return { valid: false, message: `This coupon expired on ${expiry.toLocaleDateString('en-IN')}.` }
+    }
+  }
 
   if (couponData.usageLeft <= 0) {
     return { valid: false, message: 'This coupon has been fully used.' }
@@ -56,16 +67,24 @@ export async function decrementCoupon(couponDocId) {
 
 /**
  * Create a new coupon (admin)
+ * Now supports optional expiresAt date string (YYYY-MM-DD)
  */
-export async function createCoupon({ code, discountedPrice, usageLimit }) {
-  const { addDoc } = await import('firebase/firestore')
-  return addDoc(collection(db, 'coupons'), {
-    code:           code.trim().toUpperCase(),
+export async function createCoupon({ code, discountedPrice, usageLimit, expiresAt }) {
+  const { addDoc, serverTimestamp } = await import('firebase/firestore')
+
+  const data = {
+    code:            code.trim().toUpperCase(),
     discountedPrice: Number(discountedPrice),
-    usageLeft:      Number(usageLimit),
-    totalLimit:     Number(usageLimit),
-    createdAt:      new Date(),
-  })
+    usageLeft:       Number(usageLimit),
+    totalLimit:      Number(usageLimit),
+    createdAt:       serverTimestamp(),
+  }
+
+  if (expiresAt) {
+    data.expiresAt = Timestamp.fromDate(new Date(expiresAt))
+  }
+
+  return addDoc(collection(db, 'coupons'), data)
 }
 
 /**
