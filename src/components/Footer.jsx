@@ -21,7 +21,7 @@ const quickLinks = [
 ]
 
 const contacts = [
-  { icon: Mail, text: 'hello@vaultcraft.in' },
+  { icon: Mail, text: 'hello@educrek.in' },
   { icon: Phone, text: '+91 98765 43210' },
   { icon: MapPin, text: 'New Delhi, India' },
 ]
@@ -153,7 +153,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between
   gap-3 text-slate-600 text-xs">
-          <p>© {new Date().getFullYear()} VaultCraft. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} EduCrek. All rights reserved.</p>
           <div className="flex items-center gap-4 flex-wrap justify-center">
             <Link to="/student-lookup"
               className="hover:text-slate-400 transition-colors">

@@ -2,7 +2,7 @@ export const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY
 
 export const RAZORPAY_CONFIG = {
   currency: 'INR',
-  name:     'VaultCraft',
+  name:     'EduCrek',
   description: 'Internship Program Enrollment',
   image:    '/favicon.svg',   // shown in Razorpay modal
   theme: {

@@ -15,7 +15,7 @@ const PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
  *   {{batch_name}}   — Batch 1 — Weekday Morning
  *   {{amount_paid}}  — ₹1,049
  *   {{payment_id}}   — pay_Xxx...
- *   {{portal_link}}  — https://vaultcraft.in
+ *   {{portal_link}}  — https://educrek.in
  */
 export async function sendEnrollmentEmail(studentRecord) {
   if (!SERVICE_ID || !TEMPLATE_ID || !PUBLIC_KEY) {

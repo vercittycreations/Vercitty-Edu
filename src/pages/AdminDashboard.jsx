@@ -163,7 +163,7 @@ export default function AdminDashboard() {
     setSideOpen(false)
   }
 
-  const adminEmail = auth?.currentUser?.email || 'admin@vaultcraft.in'
+  const adminEmail = auth?.currentUser?.email || 'admin@educrek.in'
   const adminInitial = adminEmail.charAt(0).toUpperCase()
 
   return (
@@ -305,7 +305,7 @@ export default function AdminDashboard() {
                   className="font-bold text-white text-base leading-none truncate">
                   {TABS.find(t => t.id === tab)?.label}
                 </motion.h1>
-                <p className="text-slate-600 text-xs mt-0.5 hidden sm:block">VaultCraft Admin Dashboard</p>
+                <p className="text-slate-600 text-xs mt-0.5 hidden sm:block">EduCrek Admin Dashboard</p>
               </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">

@@ -89,7 +89,7 @@ export default function StudentTable() {
     const ws = XLSX.utils.json_to_sheet(rows)
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Students')
-    XLSX.writeFile(wb, `VaultCraft_Students_${Date.now()}.xlsx`)
+    XLSX.writeFile(wb, `EduCrek_Students_${Date.now()}.xlsx`)
   }
 
   function exportCSV() {
@@ -104,7 +104,7 @@ export default function StudentTable() {
     const blob = new Blob([csv], { type: 'text/csv' })
     const url  = URL.createObjectURL(blob)
     const a    = document.createElement('a')
-    a.href = url; a.download = `VaultCraft_${Date.now()}.csv`; a.click()
+    a.href = url; a.download = `EduCrek_${Date.now()}.csv`; a.click()
     URL.revokeObjectURL(url)
   }
 

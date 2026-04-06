@@ -8,7 +8,7 @@ import Footer         from '../components/Footer'
 const SECTIONS = [
   {
     title: '1. Information we collect',
-    content: `When you enroll in a VaultCraft internship program, we collect personal information you provide directly: your full name, email address, mobile number, and address. We also collect payment-related information such as Razorpay payment IDs and order IDs. We do not store your card details — all payment processing is handled securely by Razorpay.`,
+    content: `When you enroll in a EduCrek internship program, we collect personal information you provide directly: your full name, email address, mobile number, and address. We also collect payment-related information such as Razorpay payment IDs and order IDs. We do not store your card details — all payment processing is handled securely by Razorpay.`,
   },
   {
     title: '2. How we use your information',
@@ -16,7 +16,7 @@ const SECTIONS = [
   },
   {
     title: '3. Data storage and security',
-    content: `Your data is stored securely in Google Firebase (Firestore), which complies with industry-standard security practices. All data in transit is encrypted using SSL/TLS. Access to student data is restricted to authorized VaultCraft administrators only. We retain your data for as long as you are an enrolled student or as required by applicable law.`,
+    content: `Your data is stored securely in Google Firebase (Firestore), which complies with industry-standard security practices. All data in transit is encrypted using SSL/TLS. Access to student data is restricted to authorized EduCrek administrators only. We retain your data for as long as you are an enrolled student or as required by applicable law.`,
   },
   {
     title: '4. Cookies',
@@ -28,7 +28,7 @@ const SECTIONS = [
   },
   {
     title: '6. Your rights',
-    content: `You have the right to access the personal data we hold about you, request correction of inaccurate data, request deletion of your data (subject to legal requirements), and withdraw consent where applicable. To exercise any of these rights, please contact us at hello@vaultcraft.in.`,
+    content: `You have the right to access the personal data we hold about you, request correction of inaccurate data, request deletion of your data (subject to legal requirements), and withdraw consent where applicable. To exercise any of these rights, please contact us at hello@educrek.in.`,
   },
   {
     title: '7. Changes to this policy',
@@ -36,7 +36,7 @@ const SECTIONS = [
   },
   {
     title: '8. Contact us',
-    content: `If you have any questions, concerns, or requests regarding this Privacy Policy, please contact us at: Email: hello@vaultcraft.in | Phone: +91 98765 43210 | Address: New Delhi, India.`,
+    content: `If you have any questions, concerns, or requests regarding this Privacy Policy, please contact us at: Email: hello@educrek.in | Phone: +91 98765 43210 | Address: New Delhi, India.`,
   },
 ]
 
@@ -78,7 +78,7 @@ export default function PrivacyPolicy() {
                 Last updated: January 1, 2025
               </p>
               <p className="text-slate-400 mt-4 leading-relaxed">
-                At VaultCraft, we take your privacy seriously. This policy explains
+                At EduCrek, we take your privacy seriously. This policy explains
                 how we collect, use, and protect your personal information when you
                 use our internship enrollment platform.
               </p>
@@ -108,9 +108,9 @@ export default function PrivacyPolicy() {
             <div className="mt-8 text-center">
               <p className="text-slate-600 text-sm">
                 Questions?{' '}
-                <a href="mailto:hello@vaultcraft.in"
+                <a href="mailto:hello@educrek.in"
                   className="text-indigo-400 hover:text-indigo-300 transition-colors">
-                  hello@vaultcraft.in
+                  hello@educrek.in
                 </a>
               </p>
             </div>

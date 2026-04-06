@@ -209,9 +209,9 @@ export default function StudentLookup() {
                 className="text-center text-slate-600 text-xs mt-6"
               >
                 Lost your Student ID? Email us at{' '}
-                <a href="mailto:hello@vaultcraft.in"
+                <a href="mailto:hello@educrek.in"
                   className="text-indigo-400 hover:text-indigo-300 transition-colors">
-                  hello@vaultcraft.in
+                  hello@educrek.in
                 </a>
               </motion.p>
             )}

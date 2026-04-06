@@ -23,7 +23,7 @@ function buildCertificateHTML(record) {
 <html>
 <head>
 <meta charset="UTF-8"/>
-<title>VaultCraft Certificate — ${record.studentId}</title>
+<title>EduCrek Certificate — ${record.studentId}</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -107,14 +107,14 @@ function buildCertificateHTML(record) {
 <body>
 <div class="cert">
   <div class="top-line">
-    <div class="brand">Vault<span>Craft</span></div>
+    <div class="brand">Edu<span>Crekrek</span></div>
     <div class="badge">Certificate of Completion</div>
   </div>
   <div class="title">This is to certify that</div>
   <div class="name">${record.fullName}</div>
   <div class="desc">
     has successfully completed the
-    <strong>${record.course}</strong> internship program at VaultCraft,
+    <strong>${record.course}</strong> internship program at EduCrek,
     demonstrating exceptional commitment and skill development
     throughout the duration of the program.
   </div>
@@ -176,8 +176,8 @@ function buildInvoiceHTML(record) {
 <body>
   <div class="header">
     <div>
-      <div class="brand">Vault<span>Craft</span></div>
-      <div style="color:#64748B;font-size:13px;margin-top:6px;">hello@vaultcraft.in · New Delhi, India</div>
+      <div class="brand">Edu<span>Crek</span></div>
+      <div style="color:#64748B;font-size:13px;margin-top:6px;">hello@educrek.in · New Delhi, India</div>
     </div>
     <div style="text-align:right">
       <div class="inv-title">Tax Invoice</div>
@@ -234,7 +234,7 @@ function buildInvoiceHTML(record) {
 
   <div class="footer">
     <div>This is a computer-generated invoice and does not require a physical signature.</div>
-    <div>For support, contact hello@vaultcraft.in</div>
+    <div>For support, contact hello@educrek.in</div>
   </div>
 </body>
 </html>`
@@ -426,7 +426,7 @@ function NextSteps() {
 function downloadReceipt(record) {
   const lines = [
     '========================================',
-    '     VAULTCRAFT INTERNSHIP PROGRAM      ',
+    '     EDUCREK INTERNSHIP PROGRAM      ',
     '   ENROLLMENT CONFIRMATION RECEIPT      ',
     '========================================',
     '',
@@ -447,13 +447,13 @@ function downloadReceipt(record) {
     '',
     '========================================',
     'Keep this receipt for your records.',
-    'Support: hello@vaultcraft.in',
+    'Support: hello@educrek.in',
     '========================================',
   ].filter(l => l !== undefined)
   const blob = new Blob([lines.join('\n')], { type: 'text/plain' })
   const url  = URL.createObjectURL(blob)
   const a    = document.createElement('a')
-  a.href = url; a.download = `VaultCraft_${record.studentId}_Receipt.txt`; a.click()
+  a.href = url; a.download = `EduCrek_${record.studentId}_Receipt.txt`; a.click()
   URL.revokeObjectURL(url)
 }
 
@@ -600,14 +600,14 @@ export default function Success() {
               className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8"
             >
               <button
-                onClick={() => printInNewWindow(buildCertificateHTML(record), `VaultCraft_Certificate_${record.studentId}`)}
+                onClick={() => printInNewWindow(buildCertificateHTML(record), `EduCrek_Certificate_${record.studentId}`)}
                 className="btn-accent py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm"
               >
                 <Award size={16} />
                 Download Certificate
               </button>
               <button
-                onClick={() => printInNewWindow(buildInvoiceHTML(record), `VaultCraft_Invoice_${record.studentId}`)}
+                onClick={() => printInNewWindow(buildInvoiceHTML(record), `EduCrek_Invoice_${record.studentId}`)}
                 className="btn-outline py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm"
               >
                 <FileText size={16} />

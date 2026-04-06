@@ -54,7 +54,7 @@ export default function Navbar() {
               <Zap size={15} fill="white" color="white" />
             </motion.div>
             <span className="font-bold text-[17px] tracking-tight whitespace-nowrap">
-              Vault<span className="text-indigo-400">Craft</span>
+              Edu<span className="text-indigo-400">Crek</span>
             </span>
           </Link>
 

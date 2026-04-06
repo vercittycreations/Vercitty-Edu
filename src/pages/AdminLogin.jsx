@@ -123,7 +123,7 @@ export default function AdminLogin() {
                   <input
                     type="email"
                     autoComplete="email"
-                    placeholder="admin@vaultcraft.in"
+                    placeholder="admin@educrek.in"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     disabled={loading}

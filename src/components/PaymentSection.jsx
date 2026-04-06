@@ -194,7 +194,7 @@ export default function PaymentSection({ formData, coupon, onSuccess }) {
                 in {dupWarning.course}.
               </p>
               <p className="text-xs text-yellow-400/70 mt-1">
-                Contact us at hello@vaultcraft.in if you think this is a mistake.
+                Contact us at hello@educrek.in if you think this is a mistake.
               </p>
             </div>
           </div>
