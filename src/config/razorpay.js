@@ -4,7 +4,8 @@ export const RAZORPAY_CONFIG = {
   currency: 'INR',
   name:     'EduCrek',
   description: 'Internship Program Enrollment',
-  image:    '/favicon.svg',   // shown in Razorpay modal
+  // Must be absolute URL for Razorpay modal to load it correctly
+  image:    'https://educrek.in/favicon.svg',
   theme: {
     color: '#6366F1',
   },

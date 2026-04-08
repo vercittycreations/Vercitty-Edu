@@ -2,7 +2,6 @@ import { RAZORPAY_KEY, RAZORPAY_CONFIG, BASE_PRICE } from '../config/razorpay'
 
 /**
  * Validate that the amount in paise matches the expected price.
- * Call this BEFORE opening Razorpay.
  */
 export function validateAmount(amountInPaise, coupon) {
   const expectedPrice = coupon ? coupon.discountedPrice : BASE_PRICE
@@ -22,19 +21,21 @@ export function validateAmount(amountInPaise, coupon) {
 /**
  * Opens Razorpay checkout modal.
  * amount → in paise (e.g. 149900 for ₹1499)
- *
- * Returns a Promise that resolves with payment response on success,
- * or rejects on failure / user close.
  */
 export function openRazorpay({ amount, prefill, notes = {}, coupon = null }) {
-  // ── Amount validation before opening modal ──
   validateAmount(amount, coupon)
 
   return new Promise((resolve, reject) => {
     if (!window.Razorpay) {
-      reject(new Error('Razorpay SDK not loaded. Check internet connection.'))
+      reject(new Error('Razorpay SDK not loaded. Please refresh the page and try again.'))
       return
     }
+
+    // Razorpay needs 10-digit number only (strip +91 or 91 prefix if present)
+    const rawPhone = String(prefill?.phone || '').replace(/\D/g, '')
+    const phone10  = rawPhone.length === 12 && rawPhone.startsWith('91')
+      ? rawPhone.slice(2)
+      : rawPhone.length === 10 ? rawPhone : ''
 
     const options = {
       key:         RAZORPAY_KEY,
@@ -47,13 +48,19 @@ export function openRazorpay({ amount, prefill, notes = {}, coupon = null }) {
       prefill: {
         name:    prefill?.name  || '',
         email:   prefill?.email || '',
-        contact: prefill?.phone || '',
+        contact: phone10,
       },
       notes,
+      retry: {
+        enabled:   true,
+        max_count: 3,
+      },
       handler: (response) => {
         resolve(response)
       },
       modal: {
+        backdropclose: false,
+        escape:        false,
         ondismiss: () => {
           reject(new Error('Payment cancelled by user.'))
         },
@@ -62,7 +69,7 @@ export function openRazorpay({ amount, prefill, notes = {}, coupon = null }) {
 
     const rzp = new window.Razorpay(options)
     rzp.on('payment.failed', (resp) => {
-      reject(new Error(resp.error?.description || 'Payment failed.'))
+      reject(new Error(resp.error?.description || 'Payment failed. Please try again.'))
     })
     rzp.open()
   })

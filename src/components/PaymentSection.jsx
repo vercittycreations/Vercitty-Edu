@@ -60,7 +60,7 @@ export default function PaymentSection({ formData, coupon, onSuccess }) {
         prefill: {
           name:  formData.fullName,
           email: formData.email,
-          phone: `91${formData.mobile}`,
+          phone: formData.mobile,
         },
         notes: { course: formData.course, batch: formData.batch },
       })
