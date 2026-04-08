@@ -1,16 +1,13 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
-  Zap, Github, Twitter, Linkedin,
-  Instagram, Mail, Phone, MapPin,
+  Zap, Github,Linkedin, Mail, Phone, MapPin,
   ExternalLink,
 } from 'lucide-react'
 
 const socials = [
-  { icon: Github, href: 'https://github.com', label: 'GitHub' },
-  { icon: Twitter, href: 'https://twitter.com', label: 'Twitter' },
-  { icon: Linkedin, href: 'https://linkedin.com', label: 'LinkedIn' },
-  { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
+  { icon: Github, href: 'https://github.com/educrek', label: 'GitHub' },
+  { icon: Linkedin, href: 'https://linkedin.com/in/educrek', label: 'LinkedIn' }
 ]
 
 const quickLinks = [
@@ -21,8 +18,8 @@ const quickLinks = [
 ]
 
 const contacts = [
-  { icon: Mail, text: 'hello@educrek.in' },
-  { icon: Phone, text: '+91 98765 43210' },
+  { icon: Mail, text: 'educrek@gmail.com' },
+  { icon: Phone, text: 'Available Soon' },
   { icon: MapPin, text: 'New Delhi, India' },
 ]
 
@@ -48,7 +45,7 @@ export default function Footer() {
                 <Zap size={16} fill="white" color="white" />
               </div>
               <span className="font-display font-bold text-lg">
-                Vault<span className="text-indigo-400">Craft</span>
+                Edu<span className="text-indigo-400">Crek</span>
               </span>
             </Link>
 

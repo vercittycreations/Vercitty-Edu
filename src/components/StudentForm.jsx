@@ -6,10 +6,10 @@ import {
 import { getAllCourses } from '../services/courseService'
 
 const BATCHES = [
-  'Batch 1 — Weekday Morning (9AM–11AM)',
-  'Batch 2 — Weekday Evening (6PM–8PM)',
-  'Batch 3 — Weekend Morning (10AM–1PM)',
-  'Batch 4 — Weekend Evening (3PM–6PM)',
+  'Batch 1',
+  'Batch 2',
+  'Batch 3',
+  'Batch 4',
 ]
 
 /* 
@@ -161,10 +161,10 @@ export default function StudentForm({ onNext, defaultValues }) {
                     <option key={c.docId} value={c.name}>{c.name}</option>
                   ))
                 : <>
-                    <option value="Full-Stack Development">Full-Stack Development</option>
-                    <option value="UI/UX Design">UI/UX Design</option>
-                    <option value="Data Science">Data Science</option>
-                    <option value="Cyber Security">Cyber Security</option>
+                    <option value="Full-Stack Development">Python Development</option>
+                    <option value="UI/UX Design">Web Development with AI</option>
+                    <option value="Data Science">Graphics Design</option>
+                    <option value="Cyber Security">Communication Skills</option>
                   </>
               }
             </select>

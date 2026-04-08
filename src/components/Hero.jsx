@@ -6,7 +6,7 @@ import {
 
 const stats = [
   { icon: Users, value: '500+',  label: 'Students Enrolled' },
-  { icon: Clock, value: '8 Wks', label: 'Program Duration'  },
+  { icon: Clock, value: '4 Wks', label: 'Program Duration'  },
   { icon: Award, value: '100%',  label: 'Certificate Given' },
 ]
 
@@ -40,7 +40,7 @@ export default function Hero() {
         className="badge mb-6"
       >
         <Sparkles size={12} />
-        Applications Open — Batch 2025
+        Applications Open — Batch 2026
       </motion.div>
 
       {/* Headline */}

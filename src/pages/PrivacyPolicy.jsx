@@ -108,9 +108,9 @@ export default function PrivacyPolicy() {
             <div className="mt-8 text-center">
               <p className="text-slate-600 text-sm">
                 Questions?{' '}
-                <a href="mailto:hello@educrek.in"
+                <a href="mailto:educrek@gmail.com"
                   className="text-indigo-400 hover:text-indigo-300 transition-colors">
-                  hello@educrek.in
+                 educrek@gmail.com
                 </a>
               </p>
             </div>

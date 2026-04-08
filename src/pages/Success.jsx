@@ -599,13 +599,13 @@ export default function Success() {
               transition={{ delay: 1.0 }}
               className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8"
             >
-              <button
+              {/* <button
                 onClick={() => printInNewWindow(buildCertificateHTML(record), `EduCrek_Certificate_${record.studentId}`)}
                 className="btn-accent py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm"
               >
                 <Award size={16} />
                 Download Certificate
-              </button>
+              </button> */}
               <button
                 onClick={() => printInNewWindow(buildInvoiceHTML(record), `EduCrek_Invoice_${record.studentId}`)}
                 className="btn-outline py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm"

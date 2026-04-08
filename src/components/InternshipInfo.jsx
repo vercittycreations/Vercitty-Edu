@@ -11,30 +11,30 @@ import GlassCard from './ui/GlassCard'
 const courses = [
   {
     icon:  Code2,
-    title: 'Full-Stack Development',
-    desc:  'React, Node.js, MongoDB — build production-grade web apps.',
-    tags:  ['React', 'Node.js', 'MongoDB'],
+    title: 'Ai Web Development',
+    desc:  'React, Node.js, Interactive web apps,and also real work experience',
+    tags:  ['React', 'Node.js', 'Ai Web Devlopment'],
     color: 'indigo',
   },
   {
     icon:  Palette,
-    title: 'UI/UX Design',
-    desc:  'Figma, design systems, and user research methodologies.',
-    tags:  ['Figma', 'Prototyping', 'Research'],
+    title: 'Python Development',
+    desc:  'Basics to Advance Python Course,1 Major,2 Minor Python project',
+    tags:  ['Python Libraries', 'Ai with Python', 'Python'],
     color: 'violet',
   },
   {
-    icon:  BarChart3,
-    title: 'Data Science',
-    desc:  'Python, ML models, data visualization, and analytics pipelines.',
-    tags:  ['Python', 'ML', 'Pandas'],
+    icon:  Palette,
+    title: 'Graphic Design',
+    desc:  'Free Canva Pro Subcription,Logo with Ai, Basic Video Editing',
+    tags:  ['Full Canva Acces', 'Video Editing', 'AIMM Certificate','Capcut'],
     color: 'cyan',
   },
   {
     icon:  Shield,
-    title: 'Cyber Security',
-    desc:  'Ethical hacking, network security, and penetration testing.',
-    tags:  ['Ethical Hacking', 'Linux', 'Networks'],
+    title: 'Communications Skills',
+    desc:  'Basic Communication skill for interviwes.',
+    tags:  ['Confidence Building', 'Vocabullary', 'English'],
     color: 'green',
   },
 ]
@@ -95,7 +95,7 @@ export default function InternshipInfo() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-slate-400 text-base sm:text-lg leading-relaxed"
         >
-          8-week intensive programs built for students who want to go beyond theory.
+          4-week intensive programs built for students who want to go beyond theory.
           Pick a track, learn by doing, and graduate job-ready.
         </motion.p>
       </div>
@@ -193,7 +193,7 @@ export default function InternshipInfo() {
           <div className="divider w-full" />
 
           <ul className="text-left w-full space-y-2.5">
-            {['8-week live program', 'Certificate of completion',
+            {['4-week live program', 'Certificate of completion',
               'Project portfolio', 'Mentor support'].map(item => (
               <li key={item} className="flex items-center gap-2.5 text-sm text-slate-300">
                 <CheckCircle2 size={14} className="text-green-400 shrink-0" />
