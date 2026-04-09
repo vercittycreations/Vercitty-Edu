@@ -36,3 +36,4 @@ Thumbs.db
 
 # firebase (optional)
 firebase-debug.log
+firestore.rules
