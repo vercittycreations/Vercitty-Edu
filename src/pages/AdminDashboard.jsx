@@ -166,6 +166,13 @@ export default function AdminDashboard() {
   const adminEmail = auth?.currentUser?.email || 'admin@educrek.in'
   const adminInitial = adminEmail.charAt(0).toUpperCase()
 
+  const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024)
+  useEffect(() => {
+    const handler = () => setIsDesktop(window.innerWidth >= 1024)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+
   return (
     <PageTransition>
       {/*
@@ -191,9 +198,9 @@ export default function AdminDashboard() {
         {/* ── SIDEBAR ──────────────────────────────────────── */}
         <motion.aside
           initial={false}
-          animate={{ x: sideOpen ? 0 : '-100%' }}
+          animate={{ x: isDesktop ? 0 : sideOpen ? 0 : '-100%' }}
           transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-          className="fixed top-0 left-0 bottom-0 z-40 w-60 flex flex-col border-r border-white/5 bg-[#080f1e] lg:relative lg:translate-x-0 lg:flex"
+          className="fixed top-0 left-0 bottom-0 z-40 w-60 flex flex-col border-r border-white/5 bg-[#080f1e] lg:relative lg:flex"
         >
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             <div className="absolute -top-16 -left-16 w-56 h-56 rounded-full bg-indigo-600/10 blur-[70px]" />

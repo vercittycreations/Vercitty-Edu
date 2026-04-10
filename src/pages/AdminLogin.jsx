@@ -86,7 +86,7 @@ export default function AdminLogin() {
               <Zap size={26} fill="white" color="white" />
             </motion.div>
             <h1 className="font-bold text-2xl">
-              Vault<span className="text-indigo-400">Craft</span>
+              Edu<span className="text-indigo-400">Crek</span>
             </h1>
             <p className="text-slate-500 text-sm mt-1">Admin Portal</p>
           </motion.div>
